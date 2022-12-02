@@ -1,9 +1,12 @@
 #include<stdio.h>
 
 #include<stdlib.h>
-#include "map.c"
+
+#include "movement.c"
 #include "ultrasonido.c"
+
 #include "main.h"
+
 
 
 
@@ -13,41 +16,12 @@ USdistances measurement1;
 int main()
 {
     // Para el mapeo
-    DebugPrint("hola", 5, 5.5);
     mapping();
     while(1){
-        moveAheadSimulation(RIGHT);
-        moveAheadSimulation(RIGHT);
-        moveAheadSimulation(RIGHT);
-        moveAheadSimulation(RIGHT);
-        moveAheadSimulation(RIGHT);
-        moveAheadSimulation(RIGHT);
-        moveAheadSimulation(RIGHT);
-        moveAheadSimulation(RIGHT);
-        moveAheadSimulation(BACK);
-        moveAheadSimulation(BACK);
-        moveAheadSimulation(BACK);
-        moveAheadSimulation(BACK);
-        moveAheadSimulation(BACK);
-        moveAheadSimulation(BACK);
-        moveAheadSimulation(BACK);
-        moveAheadSimulation(BACK);
-        moveAheadSimulation(LEFT);
-        moveAheadSimulation(LEFT);
-        moveAheadSimulation(LEFT);
-        moveAheadSimulation(LEFT);
-        moveAheadSimulation(LEFT);
-        moveAheadSimulation(LEFT);
-        moveAheadSimulation(LEFT);
-        moveAheadSimulation(LEFT);
-        moveAheadSimulation(FRONT);
-        moveAheadSimulation(FRONT);
-        moveAheadSimulation(FRONT);
-        moveAheadSimulation(FRONT);
-        moveAheadSimulation(FRONT);
-        moveAheadSimulation(FRONT);
-        moveAheadSimulation(FRONT);
-        moveAheadSimulation(FRONT);
+        
+        moveAhead();
+        getDistanceFront(&measurement1);
+        DebugPrint("hola", 0, measurement1.USfront);
     }
     // 1.init: Distancias iniciales y acercarse a la pared más cercana
 
@@ -56,7 +30,7 @@ int main()
 
 void init()
 {
-    getAll(&measurement1);
+    //getAll(&measurement1,&currentSimDirection);
     if (nearest(measurement1.USfront, measurement1.USback, measurement1.USleft, measurement1.USright) == FRONT)
     {
         // turnToNearest()

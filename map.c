@@ -10,7 +10,10 @@ typedef struct
 	char state; // * indicar� obstaculo, ser� vacio
 } MapPoint;
 
-int myDelay=100;
+direction CurrentDirectionMovement = RIGHT; // comienza mirando al frente
+//just for simulation
+
+int myDelay = 100;
 int startpointx = 10;
 int startpointy = 5;
 int anchoWally = 10;
@@ -18,8 +21,13 @@ int altoWally = 10;
 void display_map();
 void fillVoidLine(int line);
 void robotPrint(int posxInit, int posyInit, direction dir);
+void usReading(USdistances *Measurement);
 void delay(int milli_seconds);
 void robotCleanH(int posx, int posy);
+float check_US_RIGHT();
+float check_US_LEFT();
+float check_US_UP();
+float check_US_DOWN();
 
 int rows = 50;
 int columns = 50;
@@ -223,13 +231,13 @@ void robotCleanH(int posxc, int posyc)
 }
 void DebugPrint(char message[64], int valI, float valf)
 {
-	setxy(startpointx, startpointy + rows + 5);
+	setxy(0, 0);
 	printf("\n");
 	printf(message);
 	printf(" --valor entero: %i, valor flotante: %f \n", valI, valf);
 }
 
-void moveAheadSimulation(direction CurrentDirectionMovement)
+void moveAheadSimulation()
 {
 	if (CurrentDirectionMovement == FRONT)
 	{
@@ -270,90 +278,135 @@ void moveAheadSimulation(direction CurrentDirectionMovement)
 		}
 	}
 }
-direction turnFrontSimulation(direction CurrentDirectionMovement)
+void turnFrontSimulation()
 {
 	if (CurrentDirectionMovement == FRONT)
 	{
-		return FRONT;
+		CurrentDirectionMovement = FRONT;
 	}
 	else if (CurrentDirectionMovement == BACK)
 	{
-		return BACK;
+		CurrentDirectionMovement = BACK;
 	}
 	else if (CurrentDirectionMovement == LEFT)
 	{
-		return LEFT;
+		CurrentDirectionMovement = LEFT;
 	}
 	else if (CurrentDirectionMovement == RIGHT)
 	{
-		return RIGHT;
+		CurrentDirectionMovement = RIGHT;
 	}
 }
-direction turnBackSimulation(direction CurrentDirectionMovement)
+void turnBackSimulation()
 {
 	if (CurrentDirectionMovement == FRONT)
 	{
-		return BACK;
+		CurrentDirectionMovement = BACK;
 	}
 	else if (CurrentDirectionMovement == BACK)
 	{
-		return FRONT;
+		CurrentDirectionMovement = FRONT;
 	}
 	else if (CurrentDirectionMovement == LEFT)
 	{
-		return LEFT;
+		CurrentDirectionMovement = LEFT;
 	}
 	else if (CurrentDirectionMovement == RIGHT)
 	{
-		return RIGHT;
+		CurrentDirectionMovement = RIGHT;
 	}
 }
-direction turnLeftSimulation(direction CurrentDirectionMovement)
+void turnLeftSimulation()
 {
 	if (CurrentDirectionMovement == FRONT)
 	{
-		return LEFT;
+		CurrentDirectionMovement = LEFT;
 	}
 	else if (CurrentDirectionMovement == BACK)
 	{
-		return RIGHT;
+		CurrentDirectionMovement = RIGHT;
 	}
 	else if (CurrentDirectionMovement == LEFT)
 	{
-		return BACK;
+		CurrentDirectionMovement = BACK;
 	}
 	else if (CurrentDirectionMovement == RIGHT)
 	{
-		return FRONT;
+		CurrentDirectionMovement = FRONT;
 	}
 }
-direction turnRightSimulation(direction CurrentDirectionMovement)
+void turnRightSimulation()
 {
 	if (CurrentDirectionMovement == FRONT)
 	{
-		return RIGHT;
+		CurrentDirectionMovement = RIGHT;
 	}
 	else if (CurrentDirectionMovement == BACK)
 	{
-		return LEFT;
+		CurrentDirectionMovement = LEFT;
 	}
 	else if (CurrentDirectionMovement == LEFT)
 	{
-		return FRONT;
+		CurrentDirectionMovement = FRONT;
 	}
 	else if (CurrentDirectionMovement == RIGHT)
 	{
-		return BACK;
+		CurrentDirectionMovement = BACK;
 	}
+}
+
+void usReading(USdistances *Measurement)
+{
+	if (CurrentDirectionMovement == FRONT)
+	{
+		Measurement->USfront = check_US_UP();
+		Measurement->USback = check_US_DOWN();
+		Measurement->USleft = check_US_LEFT();
+		Measurement->USright = check_US_RIGHT();
+	}
+	else if (CurrentDirectionMovement == BACK)
+	{
+		Measurement->USfront = check_US_DOWN();
+		Measurement->USback = check_US_UP();
+		Measurement->USleft = check_US_RIGHT();
+		Measurement->USright = check_US_LEFT();
+	}
+	else if (CurrentDirectionMovement == LEFT)
+	{
+		Measurement->USfront = check_US_LEFT();
+		Measurement->USback = check_US_RIGHT();
+		Measurement->USleft = check_US_DOWN();
+		Measurement->USright = check_US_UP();
+	}
+	else if (CurrentDirectionMovement == RIGHT)
+	{
+		Measurement->USfront = check_US_RIGHT();
+		Measurement->USback = check_US_LEFT();
+		Measurement->USleft = check_US_UP();
+		Measurement->USright = check_US_DOWN();
+	}
+}
+
+float check_US_RIGHT(){
+	return 1;
+}
+float check_US_LEFT(){
+	return 1;
+}
+float check_US_UP(){
+	return 1;
+}
+float check_US_DOWN(){
+	return 1;
 }
 
 void delay(int milli_seconds)
 {
- 
-    // Storing start time
-    clock_t start_time = clock();
- 
-    // looping till required time is not achieved
-    while (clock() < start_time + milli_seconds)
-        ;
+
+	// Storing start time
+	clock_t start_time = clock();
+
+	// looping till required time is not achieved
+	while (clock() < start_time + milli_seconds)
+		;
 }

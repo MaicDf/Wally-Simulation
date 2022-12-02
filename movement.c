@@ -2,11 +2,7 @@
 #include <stdlib.h>
 #include "main.h"
 
-void moveAheadSimulation();
-void turnFrontSimulation();
-void turnBackSimulation();
-void turnLeftSimulation();
-void turnRightSimulation();
+
 
 void moveAhead()
 {
@@ -18,108 +14,23 @@ void moveAhead()
 
 void turnFront()
 {
+     //aquí es necesario actualizar la dirección actual
+     //mensaje de confirmación cuando no haya simulación
+    turnFrontSimulation();
 }
 
 void turnBack()
 {
+    turnBackSimulation();
+
 }
 
 void turnLeft()
 {
+    turnLeftSimulation();
 }
 
 void turnRight()
 {
-}
-
-void moveAheadSimulation(direction CurrentDirectionMovement)
-{
-    if (CurrentDirectionMovement == FRONT)
-    {
-    }
-    else if (CurrentDirectionMovement == BACK)
-    {
-    }
-    else if (CurrentDirectionMovement == LEFT)
-    {
-    }
-    else if (CurrentDirectionMovement == RIGHT)
-    {
-    }
-}
-direction turnFrontSimulation(direction CurrentDirectionMovement)
-{
-    if (CurrentDirectionMovement == FRONT)
-    {
-        return FRONT;
-    }
-    else if (CurrentDirectionMovement == BACK)
-    {
-        return BACK;
-    }
-    else if (CurrentDirectionMovement == LEFT)
-    {
-        return LEFT;
-    }
-    else if (CurrentDirectionMovement == RIGHT)
-    {
-        return RIGHT;
-    }
-}
-void turnBackSimulation(direction CurrentDirectionMovement)
-{
-    if (CurrentDirectionMovement == FRONT)
-    {
-        return BACK;
-    }
-    else if (CurrentDirectionMovement == BACK)
-    {
-        return FRONT;
-    }
-    else if (CurrentDirectionMovement == LEFT)
-    {
-        return LEFT;
-    }
-    else if (CurrentDirectionMovement == RIGHT)
-    {
-        return RIGHT;
-    }
-}
-void turnLeftSimulation(direction CurrentDirectionMovement)
-{
-    if (CurrentDirectionMovement == FRONT)
-    {
-        return LEFT;
-    }
-    else if (CurrentDirectionMovement == BACK)
-    {
-        return RIGHT;
-    }
-    else if (CurrentDirectionMovement == LEFT)
-    {
-        return BACK;
-    }
-    else if (CurrentDirectionMovement == RIGHT)
-    {
-        return FRONT;
-    }
-}
-void turnRightSimulation(direction CurrentDirectionMovement)
-{
-    if (CurrentDirectionMovement == FRONT)
-    {
-        return RIGHT;
-    }
-    else if (CurrentDirectionMovement == BACK)
-    {
-        return LEFT;
-    }
-    else if (CurrentDirectionMovement == LEFT)
-    {
-        return FRONT;
-    }
-    else if (CurrentDirectionMovement == RIGHT)
-    {
-        return BACK;
-    }
+    turnRightSimulation();
 }

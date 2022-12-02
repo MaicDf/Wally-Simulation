@@ -1,22 +1,31 @@
 #include <stdio.h>
 #include "main.h"
-
-void getDistanceFront(USdistances* usdistances ){
-
+#include "map.c"
+float getDistanceFront(USdistances *measurement)
+{   
+    usReading( measurement);
+    return measurement->USfront;// function in zephyr, here is a function in the sim.
 }
 
-void getDistanceBack(USdistances *usdistances){
-
+float getDistanceBack(USdistances *measurement)
+{
+    usReading( measurement);
+    return measurement->USback;
 }
 
-void getDistanceLeft(USdistances *usdistances){
-
+float getDistanceLeft(USdistances *measurement)
+{   
+    usReading( measurement);
+    return measurement->USleft;
 }
 
-void getDistanceRight(USdistances *usdistances){
-
+float getDistanceRight(USdistances *measurement)
+{
+    usReading( measurement);
+    return measurement->USright;
 }
 
-void getAll(USdistances *usdistances){
-    
+void getAll(USdistances *measurement)
+{
+    usReading( measurement);
 }
