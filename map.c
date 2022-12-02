@@ -1,7 +1,9 @@
 #include <stdio.h>
+
 #include <windows.h>
 #include "main.h"
 #include <time.h>
+#include <stdbool.h>
 
 typedef struct
 {
@@ -10,10 +12,11 @@ typedef struct
 	char state; // * indicar� obstaculo, ser� vacio
 } MapPoint;
 
-direction CurrentDirectionMovement = RIGHT; // comienza mirando al frente
-//just for simulation
+direction SimCurrentDirectionMovement = FRONT; // comienza mirando al frente
+// just for simulation
 
-int myDelay = 100;
+int myDelay1 = 100;
+int myDelay2 = 50;
 int startpointx = 10;
 int startpointy = 5;
 int anchoWally = 10;
@@ -22,6 +25,7 @@ void display_map();
 void fillVoidLine(int line);
 void robotPrint(int posxInit, int posyInit, direction dir);
 void usReading(USdistances *Measurement);
+void moveAheadSimulation();
 void delay(int milli_seconds);
 void robotCleanH(int posx, int posy);
 float check_US_RIGHT();
@@ -29,11 +33,11 @@ float check_US_LEFT();
 float check_US_UP();
 float check_US_DOWN();
 
-int rows = 50;
-int columns = 50;
-MapPoint FullMap[50][50];
+int rows = 80;
+int columns = 80;
+MapPoint FullMap[80][80];
 COORD c = {0, 0};
-int robotPosX = 15, robotPosy = 13;
+int robotPosX = 45, robotPosy = 45;
 
 void setxy(int x, int y)
 {
@@ -42,12 +46,11 @@ void setxy(int x, int y)
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), c);
 }
 
-int mapping()
+void mapping()
 {
-	int robotPosX = 15, robotPosy = 13;
 	display_map();
-	robotPrint(robotPosX, robotPosy, FRONT);
-	return 0;
+	robotPrint(robotPosX, robotPosy, SimCurrentDirectionMovement);
+	ShowConsoleCursor(false);
 }
 
 void display_map()
@@ -234,151 +237,158 @@ void DebugPrint(char message[64], int valI, float valf)
 	setxy(0, 0);
 	printf("\n");
 	printf(message);
-	printf(" --valor entero: %i, valor flotante: %f \n", valI, valf);
+	printf(" --valor entero: %d, valor flotante: %f \n", SimCurrentDirectionMovement, valf);
 }
 
 void moveAheadSimulation()
 {
-	if (CurrentDirectionMovement == FRONT)
+	if (SimCurrentDirectionMovement == FRONT)
 	{
 		if (FullMap[robotPosy - startpointy - 1][robotPosX - startpointx].state == ' ') // Restricting upside
 		{
-			robotPrint(robotPosX, robotPosy--, FRONT);
+			robotPrint(robotPosX, robotPosy--, SimCurrentDirectionMovement);
 			setxy(robotPosX, robotPosy + 10);
 			printf("             ");
-			delay(myDelay);
+			delay(myDelay1);
 		}
 	}
-	else if (CurrentDirectionMovement == BACK)
+	else if (SimCurrentDirectionMovement == BACK)
 	{
 		if (FullMap[robotPosy - startpointy + altoWally][robotPosX - startpointx].state == ' ')
 		{
-			robotPrint(robotPosX, robotPosy++, BACK);
+			robotPrint(robotPosX, robotPosy++, SimCurrentDirectionMovement);
 			setxy(robotPosX, robotPosy - 1);
 			printf("             ");
-			delay(myDelay);
+			delay(myDelay1);
 		}
 	}
-	else if (CurrentDirectionMovement == LEFT)
+	else if (SimCurrentDirectionMovement == LEFT)
 	{
 		if (FullMap[robotPosy - startpointy][robotPosX - startpointx - 1].state == ' ')
 		{ // as long as the next pos isnt filled (' '), allow movement.
-			robotPrint(robotPosX--, robotPosy, LEFT);
+			robotPrint(robotPosX--, robotPosy, SimCurrentDirectionMovement);
 			robotCleanH(robotPosX + 12, robotPosy);
-			delay(myDelay);
+			delay(myDelay1);
 		}
 	}
-	else if (CurrentDirectionMovement == RIGHT)
+	else if (SimCurrentDirectionMovement == RIGHT)
 	{
 		if (FullMap[robotPosy - startpointy][robotPosX - startpointx + 2 + anchoWally].state == ' ') // Restrict bat on right side wall
 		{
-			robotPrint(robotPosX++, robotPosy, RIGHT);
+			robotPrint(robotPosX++, robotPosy, SimCurrentDirectionMovement);
 			robotCleanH(robotPosX - 1, robotPosy);
-			delay(myDelay);
+			delay(myDelay1);
 		}
 	}
 }
-void turnFrontSimulation()
-{
-	if (CurrentDirectionMovement == FRONT)
-	{
-		CurrentDirectionMovement = FRONT;
-	}
-	else if (CurrentDirectionMovement == BACK)
-	{
-		CurrentDirectionMovement = BACK;
-	}
-	else if (CurrentDirectionMovement == LEFT)
-	{
-		CurrentDirectionMovement = LEFT;
-	}
-	else if (CurrentDirectionMovement == RIGHT)
-	{
-		CurrentDirectionMovement = RIGHT;
-	}
-}
+
 void turnBackSimulation()
 {
-	if (CurrentDirectionMovement == FRONT)
+	if (SimCurrentDirectionMovement == FRONT)
 	{
-		CurrentDirectionMovement = BACK;
+		SimCurrentDirectionMovement = BACK;
+		robotPrint(robotPosX, robotPosy, SimCurrentDirectionMovement);
+		delay(myDelay2);
 	}
-	else if (CurrentDirectionMovement == BACK)
+	else if (SimCurrentDirectionMovement == BACK)
 	{
-		CurrentDirectionMovement = FRONT;
+		SimCurrentDirectionMovement = FRONT;
+		robotPrint(robotPosX, robotPosy, SimCurrentDirectionMovement);
+		delay(myDelay2);
 	}
-	else if (CurrentDirectionMovement == LEFT)
+	else if (SimCurrentDirectionMovement == LEFT)
 	{
-		CurrentDirectionMovement = LEFT;
+		SimCurrentDirectionMovement = LEFT;
+		robotPrint(robotPosX, robotPosy, SimCurrentDirectionMovement);
+		delay(myDelay2);
 	}
-	else if (CurrentDirectionMovement == RIGHT)
+	else if (SimCurrentDirectionMovement == RIGHT)
 	{
-		CurrentDirectionMovement = RIGHT;
+		SimCurrentDirectionMovement = RIGHT;
+		robotPrint(robotPosX, robotPosy, SimCurrentDirectionMovement);
+		delay(myDelay2);
 	}
 }
 void turnLeftSimulation()
 {
-	if (CurrentDirectionMovement == FRONT)
+	if (SimCurrentDirectionMovement == FRONT)
 	{
-		CurrentDirectionMovement = LEFT;
+		SimCurrentDirectionMovement = LEFT;
+		robotPrint(robotPosX, robotPosy, SimCurrentDirectionMovement);
+		delay(myDelay2);
 	}
-	else if (CurrentDirectionMovement == BACK)
+	else if (SimCurrentDirectionMovement == BACK)
 	{
-		CurrentDirectionMovement = RIGHT;
+		SimCurrentDirectionMovement = RIGHT;
+		robotPrint(robotPosX, robotPosy, SimCurrentDirectionMovement);
+		delay(myDelay2);
 	}
-	else if (CurrentDirectionMovement == LEFT)
+	else if (SimCurrentDirectionMovement == LEFT)
 	{
-		CurrentDirectionMovement = BACK;
+		SimCurrentDirectionMovement = BACK;
+		robotPrint(robotPosX, robotPosy, SimCurrentDirectionMovement);
+		delay(myDelay2);
 	}
-	else if (CurrentDirectionMovement == RIGHT)
+	else if (SimCurrentDirectionMovement == RIGHT)
 	{
-		CurrentDirectionMovement = FRONT;
+		SimCurrentDirectionMovement = FRONT;
+		robotPrint(robotPosX, robotPosy, SimCurrentDirectionMovement);
+		delay(myDelay2);
 	}
 }
 void turnRightSimulation()
 {
-	if (CurrentDirectionMovement == FRONT)
+	if (SimCurrentDirectionMovement == FRONT)
 	{
-		CurrentDirectionMovement = RIGHT;
+		DebugPrint("Entre acaaa",0,0);
+		SimCurrentDirectionMovement = RIGHT;
+		robotPrint(robotPosX, robotPosy, SimCurrentDirectionMovement);
+		delay(myDelay2);
 	}
-	else if (CurrentDirectionMovement == BACK)
+	else if (SimCurrentDirectionMovement == BACK)
 	{
-		CurrentDirectionMovement = LEFT;
+		SimCurrentDirectionMovement = LEFT;
+		robotPrint(robotPosX, robotPosy, SimCurrentDirectionMovement);
+		delay(myDelay2);
 	}
-	else if (CurrentDirectionMovement == LEFT)
+	else if (SimCurrentDirectionMovement == LEFT)
 	{
-		CurrentDirectionMovement = FRONT;
+		SimCurrentDirectionMovement = FRONT;
+		robotPrint(robotPosX, robotPosy, SimCurrentDirectionMovement);
+		delay(myDelay2);
 	}
-	else if (CurrentDirectionMovement == RIGHT)
+	else if (SimCurrentDirectionMovement == RIGHT)
 	{
-		CurrentDirectionMovement = BACK;
+		SimCurrentDirectionMovement = BACK;
+		robotPrint(robotPosX, robotPosy, SimCurrentDirectionMovement);
+		delay(myDelay2);
 	}
 }
 
 void usReading(USdistances *Measurement)
 {
-	if (CurrentDirectionMovement == FRONT)
+	if (SimCurrentDirectionMovement == FRONT)
 	{
 		Measurement->USfront = check_US_UP();
 		Measurement->USback = check_US_DOWN();
 		Measurement->USleft = check_US_LEFT();
 		Measurement->USright = check_US_RIGHT();
 	}
-	else if (CurrentDirectionMovement == BACK)
+	else if (SimCurrentDirectionMovement == BACK)
 	{
 		Measurement->USfront = check_US_DOWN();
 		Measurement->USback = check_US_UP();
 		Measurement->USleft = check_US_RIGHT();
 		Measurement->USright = check_US_LEFT();
 	}
-	else if (CurrentDirectionMovement == LEFT)
+	else if (SimCurrentDirectionMovement == LEFT)
 	{
 		Measurement->USfront = check_US_LEFT();
 		Measurement->USback = check_US_RIGHT();
 		Measurement->USleft = check_US_DOWN();
 		Measurement->USright = check_US_UP();
 	}
-	else if (CurrentDirectionMovement == RIGHT)
+	else if (SimCurrentDirectionMovement == RIGHT)
 	{
 		Measurement->USfront = check_US_RIGHT();
 		Measurement->USback = check_US_LEFT();
@@ -387,17 +397,93 @@ void usReading(USdistances *Measurement)
 	}
 }
 
-float check_US_RIGHT(){
-	return 1;
+float check_US_RIGHT()
+{
+	int distance = 0;
+	while (1)
+	{ // FullMap[altoWally / 2][robotPosX - startpointx + anchoWally + distance]
+
+		if (FullMap[altoWally / 2][robotPosX - startpointx + anchoWally + distance + 2].state == ' ')
+		{
+			distance++; // aumentar distancia en cada punto sin obstaculos
+		}
+		else
+		{
+			break;
+		}
+	}
+	if (distance > 200)
+	{
+		distance = -1;
+	}
+
+	return distance;
 }
-float check_US_LEFT(){
-	return 1;
+float check_US_LEFT()
+{
+	int distance = 0;
+	while (1)
+	{ // FullMap[altoWally / 2][robotPosX - startpointx + anchoWally + distance]
+
+		if (FullMap[altoWally / 2][robotPosX - startpointx - distance - 1].state == ' ')
+		{
+			distance++; // aumentar distancia en cada punto sin obstaculos
+		}
+		else
+		{
+			break;
+		}
+	}
+	if (distance > 200)
+	{
+		distance = -1;
+	}
+
+	return distance;
 }
-float check_US_UP(){
-	return 1;
+float check_US_UP()
+{
+	int distance = 0;
+	while (1)
+	{ // FullMap[altoWally / 2][robotPosX - startpointx + anchoWally + distance]
+
+		if (FullMap[robotPosy - startpointy - distance - 1][anchoWally / 2].state == ' ')
+		{
+			distance++; // aumentar distancia en cada punto sin obstaculos
+		}
+		else
+		{
+			break;
+		}
+	}
+	if (distance > 200)
+	{
+		distance = -1;
+	}
+
+	return distance;
 }
-float check_US_DOWN(){
-	return 1;
+float check_US_DOWN()
+{
+	int distance = 0;
+	while (1)
+	{ // FullMap[altoWally / 2][robotPosX - startpointx + anchoWally + distance]
+
+		if (FullMap[robotPosy - startpointy + altoWally + distance][anchoWally / 2].state == ' ')
+		{
+			distance++; // aumentar distancia en cada punto sin obstaculos
+		}
+		else
+		{
+			break;
+		}
+	}
+	if (distance > 200)
+	{
+		distance = -1;
+	}
+
+	return distance;
 }
 
 void delay(int milli_seconds)
@@ -409,4 +495,15 @@ void delay(int milli_seconds)
 	// looping till required time is not achieved
 	while (clock() < start_time + milli_seconds)
 		;
+}
+
+void ShowConsoleCursor(bool showFlag)
+{
+	HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
+
+	CONSOLE_CURSOR_INFO cursorInfo;
+
+	GetConsoleCursorInfo(out, &cursorInfo);
+	cursorInfo.bVisible = showFlag; // set the cursor visibility
+	SetConsoleCursorInfo(out, &cursorInfo);
 }

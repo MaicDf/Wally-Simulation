@@ -1,54 +1,76 @@
-#include<stdio.h>
+#include <stdio.h>
 
-#include<stdlib.h>
+#include <stdlib.h>
 
 #include "movement.c"
 #include "ultrasonido.c"
 
 #include "main.h"
 
-
-
-
+direction CurrentDirectionMovement;
 USdistances measurement1;
-
+void init();
 // aqui va a estar el "cerebro"
 int main()
 {
     // Para el mapeo
     mapping();
-    while(1){
-        
-        moveAhead();
-        getDistanceFront(&measurement1);
-        DebugPrint("hola", 0, measurement1.USfront);
-    }
-    // 1.init: Distancias iniciales y acercarse a la pared más cercana
+    DebugPrint("All fine", 0, 0);
 
+    // 1.init: Distancias iniciales y acercarse a la pared más cercana
+    init();
+    /* 2.edgeSearching: Al acercarse a la pared más cercana, considera las distancias
+    perpendiculares, y se va a la más cercana. En este momento se debe buscar estar
+    paralelo a la pared, luego a cada movimiento hacia adelante se hará 
+    una corrección de distancia para siempre mantenerse al margen */
     return 0;
 }
 
 void init()
 {
-    //getAll(&measurement1,&currentSimDirection);
+    getAll(&measurement1);
     if (nearest(measurement1.USfront, measurement1.USback, measurement1.USleft, measurement1.USright) == FRONT)
     {
-        // turnToNearest()
-        // while(getMeasurementFront<=20){
-        // moveFront()}
+        while (getDistanceFront(&measurement1) >= 4)
+        {   
+            moveAhead();
+        }
     }
     else if (nearest(measurement1.USfront, measurement1.USback, measurement1.USleft, measurement1.USright) == BACK)
     {
-        // moveBack ->Adjust Front==BACK
-    } //....
+        turnBack();
+        while (getDistanceFront(&measurement1) >= 4)
+        {
+            moveAhead();
+        }
+    }
+    else if (nearest(measurement1.USfront, measurement1.USback, measurement1.USleft, measurement1.USright) == RIGHT)
+    {
+        turnRight();
+        while (getDistanceFront(&measurement1) >= 4)
+        {
+            moveAhead();
+        }
+    }
+        else if (nearest(measurement1.USfront, measurement1.USback, measurement1.USleft, measurement1.USright) == LEFT)
+    {
+        turnLeft();
+        while (getDistanceFront(&measurement1) >= 4)
+        {
+            moveAhead();
+        }
+    }
+}
 
-    // MeasurementRight and Left
+void edgeSearching(){
+
+}
+   // MeasurementRight and Left
     //  Turn to the nearest
     //  Go front
     // Always keeping the distances wether it is right or left (controling this constanly).
     // Finding the edge and turn to the void side.
     // StartMapping.
-}
 
 direction furthest(float front_, float back_, float left_, float right_)
 {
@@ -97,4 +119,3 @@ direction nearest(float front_, float back_, float left_, float right_)
         return UKNOWN;
     }
 }
-

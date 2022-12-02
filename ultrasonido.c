@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "main.h"
-#include "map.c"
+
 float getDistanceFront(USdistances *measurement)
 {   
     usReading( measurement);

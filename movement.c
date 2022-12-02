@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "main.h"
-
+#include "map.c"
 
 
 void moveAhead()
@@ -12,15 +12,11 @@ void moveAhead()
     moveAheadSimulation();
 }
 
-void turnFront()
-{
-     //aquí es necesario actualizar la dirección actual
-     //mensaje de confirmación cuando no haya simulación
-    turnFrontSimulation();
-}
 
 void turnBack()
 {
+    //aquí es necesario actualizar la dirección actual
+     //mensaje de confirmación cuando no haya simulación
     turnBackSimulation();
 
 }
