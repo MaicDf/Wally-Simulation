@@ -26,6 +26,15 @@ void fillVoidLine(int line);
 void robotPrint(int posxInit, int posyInit, direction dir);
 void usReading(USdistances *Measurement);
 void moveAheadSimulation();
+void moveBackwardsSimulation();
+void DebugPrint(char message[64], int valI, float valf);
+void DebugPrint2(char message[64], int valI, float valf);
+void DebugPrint3(char message[64], int valI, float valf);
+void printGrid(GridPoint myGrid[100][100], direction myToken);
+void stopSimualtion();
+void turnBackSimulation();
+void turnLeftSimulation();
+void turnRightSimulation();
 void delay(int milli_seconds);
 void robotCleanH(int posx, int posy);
 float check_US_RIGHT();
@@ -37,7 +46,7 @@ int rows = 80;
 int columns = 80;
 MapPoint FullMap[80][80];
 COORD c = {0, 0};
-int robotPosX = 45, robotPosy = 45;
+int robotPosX = 30, robotPosy = 65;
 
 void setxy(int x, int y)
 {
@@ -237,7 +246,21 @@ void DebugPrint(char message[64], int valI, float valf)
 	setxy(0, 0);
 	printf("\n");
 	printf(message);
-	printf(" --valor entero: %d, valor flotante: %f \n", SimCurrentDirectionMovement, valf);
+	printf(" --Direccion de mov: %d, Distancia leida: %f \n", SimCurrentDirectionMovement, valf);
+}
+void DebugPrint2(char message[64], int valI, float valf)
+{
+	setxy(0, 1);
+	printf("\n");
+	printf(message);
+	printf(" --: %d, : %f \n", valI, valf);
+}
+void DebugPrint3(char message[64], int valI, float valf)
+{
+	setxy(0, 2);
+	printf("\n");
+	printf(message);
+	printf(": %d, : %f \n", valI, valf);
 }
 
 void moveAheadSimulation()
@@ -280,6 +303,53 @@ void moveAheadSimulation()
 			delay(myDelay1);
 		}
 	}
+}
+
+void moveBackwardsSimulation()
+{
+	if (SimCurrentDirectionMovement == FRONT)
+	{
+		if (FullMap[robotPosy - startpointy - 1][robotPosX - startpointx].state == ' ') // Restricting upside
+		{
+			robotPrint(robotPosX, robotPosy++, SimCurrentDirectionMovement);
+			setxy(robotPosX, robotPosy + 10);
+			printf("             ");
+			delay(myDelay1);
+		}
+	}
+	else if (SimCurrentDirectionMovement == BACK)
+	{
+		if (FullMap[robotPosy - startpointy + altoWally][robotPosX - startpointx].state == ' ')
+		{
+			robotPrint(robotPosX, robotPosy--, SimCurrentDirectionMovement);
+			setxy(robotPosX, robotPosy - 1);
+			printf("             ");
+			delay(myDelay1);
+		}
+	}
+	else if (SimCurrentDirectionMovement == LEFT)
+	{
+		if (FullMap[robotPosy - startpointy][robotPosX - startpointx - 1].state == ' ')
+		{ // as long as the next pos isnt filled (' '), allow movement.
+			robotPrint(robotPosX++, robotPosy, SimCurrentDirectionMovement);
+			robotCleanH(robotPosX + 12, robotPosy);
+			delay(myDelay1);
+		}
+	}
+	else if (SimCurrentDirectionMovement == RIGHT)
+	{
+		if (FullMap[robotPosy - startpointy][robotPosX - startpointx + 2 + anchoWally].state == ' ') // Restrict bat on right side wall
+		{
+			robotPrint(robotPosX--, robotPosy, SimCurrentDirectionMovement);
+			robotCleanH(robotPosX - 1, robotPosy);
+			delay(myDelay1);
+		}
+	}
+}
+
+stopSimualtion()
+{
+	robotPrint(robotPosX, robotPosy, SimCurrentDirectionMovement);
 }
 
 void turnBackSimulation()
@@ -340,7 +410,7 @@ void turnRightSimulation()
 {
 	if (SimCurrentDirectionMovement == FRONT)
 	{
-		DebugPrint("Entre acaaa",0,0);
+		DebugPrint("Entre acaaa", 0, 0);
 		SimCurrentDirectionMovement = RIGHT;
 		robotPrint(robotPosX, robotPosy, SimCurrentDirectionMovement);
 		delay(myDelay2);
@@ -412,10 +482,6 @@ float check_US_RIGHT()
 			break;
 		}
 	}
-	if (distance > 200)
-	{
-		distance = -1;
-	}
 
 	return distance;
 }
@@ -433,10 +499,6 @@ float check_US_LEFT()
 		{
 			break;
 		}
-	}
-	if (distance > 200)
-	{
-		distance = -1;
 	}
 
 	return distance;
@@ -456,10 +518,6 @@ float check_US_UP()
 			break;
 		}
 	}
-	if (distance > 200)
-	{
-		distance = -1;
-	}
 
 	return distance;
 }
@@ -477,10 +535,6 @@ float check_US_DOWN()
 		{
 			break;
 		}
-	}
-	if (distance > 200)
-	{
-		distance = -1;
 	}
 
 	return distance;
@@ -507,3 +561,56 @@ void ShowConsoleCursor(bool showFlag)
 	cursorInfo.bVisible = showFlag; // set the cursor visibility
 	SetConsoleCursorInfo(out, &cursorInfo);
 }
+
+void printGrid(GridPoint myGrid[100][100], direction myToken)
+{
+	DebugPrint2("entre aqui0->", myToken, myGrid[0][0].obstacle);
+	int a, b;
+	setxy(0, columns + 8);
+	printf("\n");
+	printf("Mapeo en la memoria del robot");
+	printf("\n");
+
+	for (a = 0; a < 100; a++)
+	{
+		DebugPrint3("entre aqui", 0, myGrid[0][0].obstacle);
+
+		for (b = 0; b < 100; b++)
+		{
+
+			if (myGrid[b][a].obstacle)
+			{ // graficar la fila primero
+				setxy(b, columns + 11 + a);
+				printf("*");
+			}
+			else
+			{
+				setxy(b, columns + 11 + a);
+				printf(" ");
+			}
+		}
+		printf("\n");
+	}
+}
+/* void printGrid(GridPoint* myGrid[100][100],direction myToken)
+{
+
+	int a,b;
+	setxy(0, columns + 10);
+	printf("\n");
+	printf("Mapeo en la memoria del robot");
+	printf("\n");
+	if(myToken==LEFT){
+		for (a=0;a<100;a++){
+			for(b=0;b<100;b++){
+				if(myGrid[b][a]->obstacle)//graficar la fila primero
+					printf("*");
+				else
+					printf(" ");
+			}
+			printf("\n");
+		}
+	}
+}
+
+*/
