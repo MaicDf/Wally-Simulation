@@ -30,6 +30,7 @@ void moveBackwardsSimulation();
 void DebugPrint(char message[64], int valI, float valf);
 void DebugPrint2(char message[64], int valI, float valf);
 void DebugPrint3(char message[64], int valI, float valf);
+void DebugPrint4(char message[64], int valI, float valf);
 void printGrid(GridPoint myGrid[100][100], direction myToken);
 void stopSimualtion();
 void turnBackSimulation();
@@ -46,8 +47,8 @@ int rows = 80;
 int columns = 80;
 MapPoint FullMap[80][80];
 COORD c = {0, 0};
-int robotPosX = 30, robotPosy = 65;
-
+//int robotPosX = 20, robotPosy = 70;
+int robotPosX = 40, robotPosy = 45;
 void setxy(int x, int y)
 {
 	c.X = x;
@@ -246,7 +247,7 @@ void DebugPrint(char message[64], int valI, float valf)
 	setxy(0, 0);
 	printf("\n");
 	printf(message);
-	printf(" --Direccion de mov: %d, Distancia leida: %f \n", SimCurrentDirectionMovement, valf);
+	printf(" --: %d, : %f \n", valI, valf);
 }
 void DebugPrint2(char message[64], int valI, float valf)
 {
@@ -261,6 +262,13 @@ void DebugPrint3(char message[64], int valI, float valf)
 	printf("\n");
 	printf(message);
 	printf(": %d, : %f \n", valI, valf);
+}
+void DebugPrint4(char message[64], int valI, float valf)
+{
+	setxy(0, 3);
+	printf("\n");
+	printf(message);
+	printf(": %d : %f \n", valI, valf);
 }
 
 void moveAheadSimulation()
@@ -564,7 +572,7 @@ void ShowConsoleCursor(bool showFlag)
 
 void printGrid(GridPoint myGrid[100][100], direction myToken)
 {
-	DebugPrint2("entre aqui0->", myToken, myGrid[0][0].obstacle);
+	//DebugPrint2("entre aqui0->", myToken, myGrid[0][0].obstacle);
 	int a, b;
 	setxy(0, columns + 8);
 	printf("\n");
@@ -573,7 +581,7 @@ void printGrid(GridPoint myGrid[100][100], direction myToken)
 
 	for (a = 0; a < 100; a++)
 	{
-		DebugPrint3("entre aqui", 0, myGrid[0][0].obstacle);
+		//DebugPrint3("entre aqui", 0, myGrid[0][0].obstacle);
 
 		for (b = 0; b < 100; b++)
 		{

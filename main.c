@@ -13,28 +13,28 @@ float incertidumbre_ajuste = 1;
 float incertidumbre_medicion = 0.5;
 
 // variables para mapeo y movimiento
-int SafeDistance = 6; // distancia para que el robot pueda voltear comodamente (cm)
-int stepGrid = 2;     // Separacion de cada punto en la grid
 
-float currentPosx;
-float currentposy;
-int currentPointGridX = 3;
-int currentPointGridY = 3;
+// Separacion de cada punto en la grid
+
 // auxiliares
 int NearestPlace1;
 
 void init();
 void Map_around();
-void fillGrid();
+void fillGrid(int tamx, int tamy);
 
 // aqui va a estar el "cerebro"
 int main()
 {
+    stepGrid = 2;
+    SafeDistance = 3 * stepGrid;
+    currentPointX = SafeDistance / stepGrid;
+    currentPointY = SafeDistance / stepGrid;
+
     // Para el mapeo
     mapping();
     DebugPrint("All fine", 0, 0);
     // llena el mapa
-    fillGrid();
 
     // 1.init: Distancias iniciales y acercarse a la pared más cercana
     init();
@@ -43,10 +43,14 @@ int main()
     paralelo a la pared, luego a cada movimiento hacia adelante se hará
     una corrección de distancia para siempre mantenerse al margen */
     edgeSearching();
-    /* 3.initialMapping(), va llenar un arreglo de 200*200 .............................................................................. v
+    startPointFlag = true; // para que el robot se mueva en la grid
+
+    /* 3.Map walls*/
+    // Map_walls();
+    /* 4.initialMapping(), va llenar un arreglo de 100*100 .............................................................................. v
      */
-    Map_around();
-    printGrid(Grid, Wall_to_allign);
+    // Map_around();
+    // printGrid(Grid, Wall_to_allign);
     return 0;
 }
 
@@ -54,10 +58,10 @@ void init()
 {
     getAll(&measurement1);
     NearestPlace1 = nearest(measurement1.USfront, measurement1.USback, measurement1.USleft, measurement1.USright);
-
+    DebugPrint("Entro", 0, 0);
     if (NearestPlace1 == FRONT)
     {
-        while (getDistanceFront(&measurement1) >= SafeDistance)
+        while (getDistanceFront(&measurement1) > SafeDistance)
         {
             DebugPrint("FrontDistance:", 0, getDistanceFront(&measurement1));
             moveAhead();
@@ -66,7 +70,7 @@ void init()
     else if (NearestPlace1 == BACK)
     {
         turnBack();
-        while (getDistanceFront(&measurement1) >= SafeDistance)
+        while (getDistanceFront(&measurement1) > SafeDistance)
         {
             DebugPrint("FrontDistance:", 0, getDistanceFront(&measurement1));
             moveAhead();
@@ -75,7 +79,7 @@ void init()
     else if (NearestPlace1 == RIGHT)
     {
         turnRight();
-        while (getDistanceFront(&measurement1) >= SafeDistance)
+        while (getDistanceFront(&measurement1) > SafeDistance)
         {
             DebugPrint("FrontDistance:", 0, getDistanceFront(&measurement1));
 
@@ -85,7 +89,7 @@ void init()
     else if (NearestPlace1 == LEFT)
     {
         turnLeft();
-        while (getDistanceFront(&measurement1) >= SafeDistance)
+        while (getDistanceFront(&measurement1) > SafeDistance)
         {
             DebugPrint("FrontDistance:", 0, getDistanceFront(&measurement1));
             moveAhead();
@@ -112,15 +116,15 @@ void edgeSearching()
     if (NearestPlace1 == LEFT)
     {
         turnLeft();
-        while (getDistanceFront(&measurement1) >= SafeDistance)
+        while (getDistanceFront(&measurement1) > SafeDistance)
         {
             bool ctrlDistance = controlDistance(RIGHT, SafeDistance, incertidumbre_control);
             while (!ctrlDistance)
             {
-                moveAhead();
+
                 ctrlDistance = controlDistance(RIGHT, SafeDistance, incertidumbre_control);
             }
-            DebugPrint("FrontDistance:", 0, getDistanceFront(&measurement1));
+            DebugPrint2("Left turn: Distance Front:", 0, getDistanceFront(&measurement1));
             moveAhead();
         }
         turnLeft();
@@ -129,14 +133,15 @@ void edgeSearching()
     else if (NearestPlace1 == RIGHT)
     {
         turnRight();
-        while (getDistanceFront(&measurement1) >= SafeDistance)
+        while (getDistanceFront(&measurement1) > SafeDistance)
         {
             bool ctrlDistance = controlDistance(LEFT, SafeDistance, incertidumbre_control);
             while (!ctrlDistance)
             {
                 ctrlDistance = controlDistance(LEFT, SafeDistance, incertidumbre_control);
+
             } // función para que siempre se mantenga paralelo a la pared.
-            DebugPrint("FrontDistance:", 0, getDistanceFront(&measurement1));
+            DebugPrint2("Right turn: Distance Front:", 0, getDistanceFront(&measurement1));
             moveAhead();
         }
         turnRight();
@@ -145,7 +150,7 @@ void edgeSearching()
     else if (NearestPlace1 == EQUAL)
     { // significará que son iguales las distancias
         turnRight();
-        while (getDistanceFront(&measurement1) >= SafeDistance)
+        while (getDistanceFront(&measurement1) > SafeDistance)
         {
             bool ctrlDistance = controlDistance(LEFT, SafeDistance, incertidumbre_control);
             while (!ctrlDistance)
@@ -163,7 +168,72 @@ void edgeSearching()
         init();
     }
 }
+void Map_walls()
+{
+    int topW = roundf(secureReading(FRONT, 0.5) / stepGrid);
+    int leftW = roundf(secureReading(LEFT, 0.5) / stepGrid);
+    int backW = roundf(secureReading(BACK, 0.5) / stepGrid);
+    int rightW = roundf(secureReading(RIGHT, 0.5) / stepGrid);
+    mapHeight = topW + backW;
+    mapWidth = leftW + rightW;
 
+    fillGrid(mapWidth, mapHeight);
+
+    DebugPrint("topW,secureRead", topW, secureReading(FRONT, 0.5));
+    DebugPrint2("LefW,secureRead", leftW, secureReading(LEFT, 0.5));
+    DebugPrint3("grid init invposx,invposxy", Grid[currentPointX][currentPointY].AbsPosx_inv, Grid[currentPointX][currentPointY].AbsPosy_inv);
+    DebugPrint4("grid init posx,posxy", Grid[currentPointX][currentPointY].AbsPosx, Grid[currentPointX][currentPointY].AbsPosy);
+    /*     DebugPrint3("grid init invposx,invposxy", Grid[25][30].AbsPosx_inv, Grid[25][30].AbsPosy_inv);
+        DebugPrint4("grid init posx,posxy", Grid[25][30].AbsPosx, Grid[25][30].AbsPosy); */
+    int i, j;
+
+    if (Wall_to_allign == LEFT)
+    {
+        // map wall left;
+        for (i = 0; i < mapHeight; i++)
+        {
+            Grid[currentPointX - leftW][i].obstacle = true;
+        }
+        // map wall right
+        for (i = 0; i < mapHeight; i++)
+        {
+            Grid[currentPointX + rightW][i].obstacle = true;
+        }
+        // map wall TOP
+        for (i = 0; i < mapWidth; i++)
+        {
+            Grid[i][currentPointX + topW].obstacle = true;
+        }
+        // map wall BACK
+        for (i = 0; i < mapWidth; i++)
+        {
+            Grid[i][currentPointX - backW].obstacle = true;
+        }
+    }
+    else if (Wall_to_allign == RIGHT) // esto es como hacer un mirror
+    {
+        // map wall left;
+        for (i = 0; i < mapHeight; i++)
+        {
+            Grid[currentPointX + leftW][i].obstacle = true;
+        }
+        // map wall right
+        for (i = 0; i < mapHeight; i++)
+        {
+            Grid[currentPointX - rightW][i].obstacle = true;
+        }
+        // map wall TOP
+        for (i = 0; i < mapWidth; i++)
+        {
+            Grid[i][currentPointX + topW].obstacle = true;
+        }
+        // map wall BACK
+        for (i = 0; i < mapWidth; i++)
+        {
+            Grid[i][currentPointX - backW].obstacle = true;
+        }
+    }
+}
 void Map_around()
 {
     /*
@@ -177,23 +247,23 @@ void Map_around()
     while (!end_flag)
     {
 
-        bool ctrlH_position = controlH_position(currentPointGridX, currentPointGridY, incertidumbre_ajuste);
+        bool ctrlH_position = controlH_position(currentPointX, currentPointY, incertidumbre_ajuste);
         while (!ctrlH_position)
         {
-            ctrlH_position = controlH_position(currentPointGridX, currentPointGridY, incertidumbre_ajuste);
+            ctrlH_position = controlH_position(currentPointX, currentPointY, incertidumbre_ajuste);
         }
-        bool ctrlV_position = controlV_position(currentPointGridX, currentPointGridY, incertidumbre_ajuste);
+        bool ctrlV_position = controlV_position(currentPointX, currentPointY, incertidumbre_ajuste);
         while (!ctrlV_position)
         {
-           ctrlV_position = controlV_position(currentPointGridX, currentPointGridY, incertidumbre_ajuste);
+            ctrlV_position = controlV_position(currentPointX, currentPointY, incertidumbre_ajuste);
         }
 
-       // Map_From_currentPoint(currentPointGridX, currentPointGridY, incertidumbre_medicion);
-       // turnEvaluation(currentPointGridX, currentPointGridY); // si queda tiempo, es posible evaluar giros más complicados
+        Map_From_currentPoint(currentPointX, currentPointY, incertidumbre_medicion);
+       // turnEvaluation(currentPointX, currentPointY); // si queda tiempo, es posible evaluar giros más complicados
 
-        //moveAhead_grid(currentPointGridX, currentPointGridY);
+        // moveAhead_grid(currentPointX, currentPointY);
 
-        if (currentPointGridX == 1 && currentPointGridY == 1)
+        if (currentPointX == SafeDistance / stepGrid && currentPointY == SafeDistance / stepGrid)
         {
             end_flag == true; // volvió al inicio.
         }
@@ -264,18 +334,18 @@ direction directionOpposite(direction myDir)
     else if (myDir == BACK)
         return FRONT;
 }
-void fillGrid()
+void fillGrid(int tamx, int tamy)
 {
     int x, y;
-    for (x = 0; x < 100; x++)
+    for (x = 0; x < tamx; x++)
     {
-        for (y = 0; y < 100; y++)
+        for (y = 0; y < tamy; y++)
         {
             Grid[x][y].AbsPosy = y * stepGrid;
-            Grid[x][y].AbsPosy_inv = 100 * stepGrid - y * stepGrid;
+            Grid[x][y].AbsPosy_inv = tamy * stepGrid - y * stepGrid;
 
             Grid[x][y].AbsPosx = x * stepGrid;
-            Grid[x][y].AbsPosx_inv = 100 * stepGrid - x * stepGrid;
+            Grid[x][y].AbsPosx_inv = tamx * stepGrid - x * stepGrid;
 
             Grid[x][y].obstacle = false;
         }

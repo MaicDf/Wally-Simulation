@@ -30,9 +30,12 @@ typedef struct
     int AbsPosy_inv;
 	bool obstacle; // * indicar� obstaculo, ser� vacio
 } GridPoint;
-
-bool V_OpositeWallFound=false;
-bool H_OpositeWallFound=false;
+bool startPointFlag=false;
+int SafeDistance; // distancia para que el robot pueda voltear comodamente (cm)
+int stepGrid;
+int mapHeight,mapWidth;
+int currentPointX;
+int currentPointY;
 USdistances measurement1;
 direction Wall_to_allign = NONVALID; //a que pared se pega para mapear
 GridPoint Grid[100][100]; //el mapa

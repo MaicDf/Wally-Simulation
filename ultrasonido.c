@@ -6,12 +6,12 @@ float getDistanceFront(USdistances *measurement);
 float getDistanceBack(USdistances *measurement);
 float getDistanceLeft(USdistances *measurement);
 float getDistanceRight(USdistances *measurement);
-void mapFront(float measure);
-void mapBack(float measure);
-void mapRigth(float measure);
-void mapLeft(float measure);
-void Map_From_currentPoint(int currentPointGridX, int currentPointGridY, float incertidumbre);
-float secureReading(direction myDir,float inc);
+void mapFront(int measure, int currentX, int currentY);
+void mapBack(int measure, int currentX, int currentY);
+void mapRigth(int measure, int currentX, int currentY);
+void mapLeft(int measure, int currentX, int currentY);
+void Map_From_currentPoint(int currentX, int currentY, float incertidumbre);
+float secureReading(direction myDir, float inc);
 bool igualdad(float v1, float v2, float v3, float inc);
 
 float getDistanceFront(USdistances *measurement)
@@ -62,41 +62,55 @@ void getAll(USdistances *measurement)
     measurement->USright = getDistanceRight(measurement);
 }
 
-void Map_From_currentPoint(int currentPointGridX, int currentPointGridY, float incertidumbre)
+void Map_From_currentPoint(int currentX, int currentY, float incertidumbre)
 {
-    float M_R, M_L, M_F, M_B;
-	M_R = secureReading(RIGHT, incertidumbre);
-    M_L = secureReading(LEFT ,incertidumbre);
-    M_F = secureReading(FRONT, incertidumbre);
-    M_B = secureReading(BACK ,incertidumbre);
+    int M_R, M_L, M_F, M_B;
+    M_R = roundf(secureReading(RIGHT, incertidumbre) / stepGrid);
+    M_L = roundf(secureReading(LEFT, incertidumbre) / stepGrid);
 
     if (CurrentDirectionMovement == FRONT)
     {
-        mapFront(M_F);
-        mapBack(M_B);
-        mapRigth(M_R);
-        mapLeft(M_L);
+        if (Wall_to_allign == LEFT)
+        {
+            mapRigth(M_R, currentX, currentY);
+        }
+        else
+        {
+            mapRigth(M_L, currentX, currentY);
+        }
     }
     else if (CurrentDirectionMovement == BACK)
     {
-        mapFront(M_B);
-        mapBack(M_F);
-        mapRigth(M_L);
-        mapLeft(M_R);
+        if (Wall_to_allign == LEFT)
+        {
+            mapLeft(M_R, currentX, currentY);
+        }
+        else
+        {
+            mapLeft(M_L, currentX, currentY);
+        }
     }
     else if (CurrentDirectionMovement == RIGHT)
     {
-        mapFront(M_R);
-        mapBack(M_L);
-        mapRigth(M_B);
-        mapLeft(M_F);
+        if (Wall_to_allign == LEFT)
+        {
+            mapBack(M_R, currentX, currentY);
+        }
+        else
+        {
+            mapBack(M_L, currentX, currentY);
+        }
     }
     else if (CurrentDirectionMovement == LEFT)
     {
-        mapFront(M_L);
-        mapBack(M_R);
-        mapRigth(M_F);
-        mapLeft(M_B);
+        if (Wall_to_allign == LEFT)
+        {
+            mapFront(M_R, currentX, currentY);
+        }
+        else
+        {
+            mapFront(M_L, currentX, currentY);
+        }
     }
 }
 
@@ -176,20 +190,79 @@ bool igualdad(float v1, float v2, float v3, float inc)
         return false;
 }
 
-void mapFront(float measure)
+void mapFront(int measure, int currentX, int currentY)
 {
-    if(CurrentDirectionMovement==FRONT&&V_OpositeWallFound){
-
-    }else if(CurrentDirectionMovement==RIGHT||H_OpositeWallFound){
-    	
+    int i;
+    if (measure < mapHeight / 2)
+    {
+        Grid[currentX][currentY + measure].obstacle = true;
+        for (i = currentY; i < (currentY + measure); i++)
+        {
+            Grid[currentX][i].obstacle = false;
+        }
+    }
+    else
+    {
+        for (i = currentY; i <= mapHeight / 2; i++) // mapear solo la mitad
+        {
+            Grid[currentX][i].obstacle = false;
+        }
     }
 }
-void mapBack(float measure)
+void mapBack(int measure, int currentX, int currentY)
 {
+    int i;
+    if (measure < mapHeight / 2)
+    {
+        Grid[currentX][currentY - measure].obstacle = true;
+        for (i = currentY; i > (currentY - measure); i--)
+        {
+            Grid[currentX][i].obstacle = false;
+        }
+    }
+    else
+    {
+        for (i = currentY; i >= (currentY - mapHeight / 2); i--) // mapear solo la mitad
+        {
+            Grid[currentX][i].obstacle = false;
+        }
+    }
 }
-void mapRigth(float measure)
+void mapRigth(int measure, int currentX, int currentY)
 {
+    int i;
+    if (measure < mapWidth / 2)
+    {
+        Grid[currentX + measure][currentY].obstacle = true;
+        for (i = currentX; i < (currentX + measure); i++)
+        {
+            Grid[i][currentY].obstacle = false;
+        }
+    }
+    else
+    {
+        for (i = currentX; i <= mapWidth / 2; i++) // mapear solo la mitad
+        {
+            Grid[i][currentY].obstacle = false;
+        }
+    }
 }
-void mapLeft(float measure)
+void mapLeft(int measure, int currentX, int currentY)
 {
+    int i;
+    if (measure < mapWidth / 2)
+    {
+        Grid[currentX - measure][currentY].obstacle = true;
+        for (i = currentX; i > (currentX - measure); i--)
+        {
+            Grid[i][currentY].obstacle = false;
+        }
+    }
+    else
+    {
+        for (i = currentX; i >= (currentX - mapWidth / 2); i--) // mapear solo la mitad
+        {
+            Grid[i][currentY].obstacle = false;
+        }
+    }
 }

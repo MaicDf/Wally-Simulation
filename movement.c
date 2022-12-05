@@ -7,6 +7,7 @@
 bool controlDistance(direction relativeDir, float referenceDistance, float incertidumbre);
 bool controlV_position(int currentX, int currentY, float incertidumbre);
 bool controlH_position(int currentX, int currentY, float incertidumbre);
+void moveAheadGrid();
 
 bool controlDistance(direction relativeDir, float referenceDistance, float incertidumbre)
 {
@@ -95,26 +96,29 @@ bool controlH_position(int currentX, int currentY, float incertidumbre)
     }
 
     float measured_Distance;
+
     if (Wall_to_allign == LEFT)
     {
         measured_Distance = getDistanceLeft(&measurement1);
+        DebugPrint("measuredDistance: ", 0, measured_Distance);
+        DebugPrint2("referenceDistance: ", 0, referenceDistance);
         if ((measured_Distance >= (referenceDistance - incertidumbre)) && (measured_Distance <= (referenceDistance + incertidumbre)))
         {
             controlDoneFlag = true;
         }
         else if (measured_Distance < (referenceDistance - incertidumbre))
         {
-            moveAhead();     // certain time
-            turnRight();     // 1grado o algo así.
-            moveBackwards(); // certain time
+            /*    moveAhead();     // certain time
+               turnRight();     // 1grado o algo así.
+               moveBackwards(); // certain time */
             controlDoneFlag = false;
         }
         else if (measured_Distance > (referenceDistance + incertidumbre))
         {
-            moveAhead(); // certain time
-            turnLeft();  // 1grado o algo así.
-            moveBackwards();
-            controlDoneFlag = false; // significa que todavía falta verificar el control
+            /*          moveAhead(); // certain time
+                     turnLeft();  // 1grado o algo así.
+                     moveBackwards();
+                     controlDoneFlag = false; // significa que todavía falta verificar el control */
         }
     }
     if (Wall_to_allign == RIGHT)
@@ -325,17 +329,69 @@ bool controlV_position(int currentX, int currentY, float incertidumbre)
     return controlDoneFlag;
 }
 
+void turnEvaluation(int currentX, int currentY)
+{
+    if (Grid[currentX + SafeDistance / stepGrid][currentY].obstacle == true || Grid[currentX - SafeDistance / stepGrid][currentY].obstacle == true || Grid[currentX][currentY + SafeDistance / stepGrid].obstacle == true || Grid[currentX][currentY - SafeDistance / stepGrid].obstacle == true)
+    {
+
+        if (Wall_to_allign == LEFT)
+        {
+            turnRight();
+        }
+        else
+        {
+            turnLeft();
+        }
+    }
+}
+
 void moveAhead()
 {
-    // turn motors on
-
-    // Code that only works for the simulation environment
+    // just turn motors on
     moveAheadSimulation();
+}
+
+void moveAheadGrid()
+{
+    // move ahead in the grid.
+
+    if (SimCurrentDirectionMovement == FRONT)
+    {
+        if (!Grid[currentPointX][currentPointY + SafeDistance / stepGrid].obstacle)
+        {
+            currentPointY++;
+        }
+    }
+    else if (SimCurrentDirectionMovement == BACK)
+    {
+        if (!Grid[currentPointX][currentPointY - SafeDistance / stepGrid].obstacle)
+        {
+            currentPointY--;
+        }
+    }
+    else if (SimCurrentDirectionMovement == LEFT)
+    {
+        if (!Grid[currentPointX - SafeDistance / stepGrid][currentPointY].obstacle)
+        {
+            currentPointX--;
+        }
+    }
+    else if (SimCurrentDirectionMovement == RIGHT)
+    {
+        if (!Grid[currentPointX + SafeDistance / stepGrid][currentPointY].obstacle)
+        {
+            currentPointX++;
+        }
+    }
 }
 
 void moveBackwards()
 {
     moveBackwardsSimulation();
+}
+
+void moveBackwardsGrid()
+{
 }
 
 void stop()
@@ -345,17 +401,79 @@ void stop()
 
 void turnBack()
 {
+
     // aquí es necesario actualizar la dirección actual
     // mensaje de confirmación cuando no haya simulación
     turnBackSimulation();
+
+    if (startPointFlag) // solo si se está moviendo en la grid actualizar direcciones
+    {
+        if (CurrentDirectionMovement == FRONT)
+        {
+            CurrentDirectionMovement = BACK;
+        }
+        else if (CurrentDirectionMovement == BACK)
+        {
+            CurrentDirectionMovement = FRONT;
+        }
+        else if (CurrentDirectionMovement == LEFT)
+        {
+            CurrentDirectionMovement = LEFT;
+        }
+        else if (CurrentDirectionMovement == RIGHT)
+        {
+            CurrentDirectionMovement = RIGHT;
+        }
+    }
 }
 
 void turnLeft()
 {
+
     turnLeftSimulation();
+
+    if (startPointFlag) // solo si se está moviendo en la grid actualizar direcciones
+    {
+        if (CurrentDirectionMovement == FRONT)
+        {
+            CurrentDirectionMovement = LEFT;
+        }
+        else if (CurrentDirectionMovement == BACK)
+        {
+            CurrentDirectionMovement = RIGHT;
+        }
+        else if (CurrentDirectionMovement == LEFT)
+        {
+            CurrentDirectionMovement = BACK;
+        }
+        else if (CurrentDirectionMovement == RIGHT)
+        {
+            CurrentDirectionMovement = FRONT;
+        }
+    }
 }
 
 void turnRight()
 {
+
     turnRightSimulation();
+    if (startPointFlag) // solo si se está moviendo en la grid actualizar direcciones
+    {
+        if (CurrentDirectionMovement == FRONT)
+        {
+            CurrentDirectionMovement = RIGHT;
+        }
+        else if (CurrentDirectionMovement == BACK)
+        {
+            CurrentDirectionMovement = LEFT;
+        }
+        else if (CurrentDirectionMovement == LEFT)
+        {
+            CurrentDirectionMovement = FRONT;
+        }
+        else if (CurrentDirectionMovement == RIGHT)
+        {
+            CurrentDirectionMovement = BACK;
+        }
+    }
 }
