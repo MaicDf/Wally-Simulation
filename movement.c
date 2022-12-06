@@ -100,32 +100,34 @@ bool controlH_position(int currentX, int currentY, float incertidumbre)
     if (Wall_to_allign == LEFT)
     {
         measured_Distance = getDistanceLeft(&measurement1);
-        DebugPrint("measuredDistance: ", 0, measured_Distance);
-        DebugPrint2("referenceDistance: ", 0, referenceDistance);
+
+       // DebugPrint("Reference, measured", referenceDistance, measured_Distance);
+        DebugPrint("currentMovement",CurrentDirectionMovement,0);
         if ((measured_Distance >= (referenceDistance - incertidumbre)) && (measured_Distance <= (referenceDistance + incertidumbre)))
         {
             controlDoneFlag = true;
         }
         else if (measured_Distance < (referenceDistance - incertidumbre))
         {
-            /*    moveAhead();     // certain time
-               turnRight();     // 1grado o algo así.
-               moveBackwards(); // certain time */
+            moveAhead();     // certain time
+                             // turnRight();     // 1grado o algo así.
+            moveBackwards(); // certain time
             controlDoneFlag = false;
         }
         else if (measured_Distance > (referenceDistance + incertidumbre))
         {
-            /*          moveAhead(); // certain time
-                     turnLeft();  // 1grado o algo así.
-                     moveBackwards();
-                     controlDoneFlag = false; // significa que todavía falta verificar el control */
+            moveAhead(); // certain time
+            // turnLeft();  // 1grado o algo así.
+            moveBackwards();
+            controlDoneFlag = false; // significa que todavía falta verificar el control
         }
     }
     if (Wall_to_allign == RIGHT)
     {
 
         measured_Distance = getDistanceRight(&measurement1);
-        // DebugPrint2("leftDistance",0,measured_Distance);
+        /* DebugPrint("measuredDistance: ", 0, measured_Distance);
+         DebugPrint2("referenceDistance: ", 0, referenceDistance); */
         if ((measured_Distance >= (referenceDistance - incertidumbre)) && (measured_Distance <= (referenceDistance + incertidumbre)))
         {
             controlDoneFlag = true;
@@ -133,14 +135,14 @@ bool controlH_position(int currentX, int currentY, float incertidumbre)
         else if (measured_Distance < (referenceDistance - incertidumbre))
         {
             moveAhead(); // certain time
-            turnLeft();  // 1grado o algo así.
+                         // turnLeft();  // 1grado o algo así.
             moveBackwards();
             controlDoneFlag = false;
         }
         else if (measured_Distance > (referenceDistance + incertidumbre))
         {
             moveAhead(); // certain time
-            turnRight(); // 1grado o algo así.
+            // turnRight(); // 1grado o algo así.
             moveBackwards();
             controlDoneFlag = false; // significa que todavía falta verificar el control
         }
@@ -165,16 +167,24 @@ bool controlV_position(int currentX, int currentY, float incertidumbre)
 
             if ((measured_Distance >= (referenceDistance - incertidumbre)) && (measured_Distance <= (referenceDistance + incertidumbre)))
             {
+                DebugPrint2("Done,measured", controlDoneFlag, measured_Distance);
                 controlDoneFlag = true;
             }
             else if (measured_Distance < (referenceDistance - incertidumbre))
             {
-                moveAhead(); //##FALTA->hacer una funcion de while(measured distance+-= reference)
+                while (getDistanceBack(&measurement1) < (referenceDistance - incertidumbre))
+                {
+                    DebugPrint2("referenceV,measured", referenceDistance, measured_Distance);
+                    moveAhead();
+                }
                 controlDoneFlag = false;
             }
-            else if (measured_Distance > (referenceDistance + incertidumbre))
+            else if (getDistanceBack(&measurement1) > (referenceDistance + incertidumbre))
             {
-                moveBackwards();
+                while (measured_Distance > (referenceDistance + incertidumbre))
+                {
+                    moveBackwards();
+                }
                 controlDoneFlag = false; // significa que todavía falta verificar el control
             }
         }
@@ -185,16 +195,25 @@ bool controlV_position(int currentX, int currentY, float incertidumbre)
 
             if ((measured_Distance >= (referenceDistance - incertidumbre)) && (measured_Distance <= (referenceDistance + incertidumbre)))
             {
+                DebugPrint2("Done,measured", controlDoneFlag, measured_Distance);
                 controlDoneFlag = true;
             }
             else if (measured_Distance < (referenceDistance - incertidumbre))
             {
-                moveBackwards();
+                while (getDistanceFront(&measurement1) < (referenceDistance - incertidumbre))
+                {
+                    DebugPrint2("referenceV,measured", referenceDistance, measured_Distance);
+                    moveAhead();
+                    moveBackwards();
+                }
                 controlDoneFlag = false;
             }
             else if (measured_Distance > (referenceDistance + incertidumbre))
             {
-                moveAhead();
+                while (getDistanceFront(&measurement1) > (referenceDistance + incertidumbre))
+                {
+                    moveAhead();
+                }
                 controlDoneFlag = false; // significa que todavía falta verificar el control
             }
         }
@@ -204,26 +223,6 @@ bool controlV_position(int currentX, int currentY, float incertidumbre)
         if (Grid[currentX][currentY].AbsPosy <= Grid[currentX][currentY].AbsPosy_inv)
         {
             referenceDistance = Grid[currentX][currentY].AbsPosy;
-            measured_Distance = getDistanceBack(&measurement1);
-
-            if ((measured_Distance >= (referenceDistance - incertidumbre)) && (measured_Distance <= (referenceDistance + incertidumbre)))
-            {
-                controlDoneFlag = true;
-            }
-            else if (measured_Distance < (referenceDistance - incertidumbre))
-            {
-                moveBackwards();
-                controlDoneFlag = false;
-            }
-            else if (measured_Distance > (referenceDistance + incertidumbre))
-            {
-                moveAhead();
-                controlDoneFlag = false; // significa que todavía falta verificar el control
-            }
-        }
-        else if (Grid[currentX][currentY].AbsPosy > Grid[currentX][currentY].AbsPosy_inv)
-        {
-            referenceDistance = Grid[currentX][currentY].AbsPosy_inv;
             measured_Distance = getDistanceFront(&measurement1);
 
             if ((measured_Distance >= (referenceDistance - incertidumbre)) && (measured_Distance <= (referenceDistance + incertidumbre)))
@@ -232,12 +231,44 @@ bool controlV_position(int currentX, int currentY, float incertidumbre)
             }
             else if (measured_Distance < (referenceDistance - incertidumbre))
             {
-                moveAhead();
+                while (getDistanceFront(&measurement1) < (referenceDistance - incertidumbre))
+                {
+                    moveBackwards();
+                }
                 controlDoneFlag = false;
             }
             else if (measured_Distance > (referenceDistance + incertidumbre))
             {
-                moveBackwards();
+                while (getDistanceFront(&measurement1) > (referenceDistance + incertidumbre))
+                {
+                    moveAhead();
+                }
+                controlDoneFlag = false; // significa que todavía falta verificar el control
+            }
+        }
+        else if (Grid[currentX][currentY].AbsPosy > Grid[currentX][currentY].AbsPosy_inv)
+        {
+            referenceDistance = Grid[currentX][currentY].AbsPosy_inv;
+            measured_Distance = getDistanceBack(&measurement1);
+
+            if ((measured_Distance >= (referenceDistance - incertidumbre)) && (measured_Distance <= (referenceDistance + incertidumbre)))
+            {
+                controlDoneFlag = true;
+            }
+            else if (measured_Distance < (referenceDistance - incertidumbre))
+            {
+                while (getDistanceBack(&measurement1) < (referenceDistance - incertidumbre))
+                {
+                    moveAhead();
+                }
+                controlDoneFlag = false;
+            }
+            else if (measured_Distance > (referenceDistance + incertidumbre))
+            {
+                while (getDistanceBack(&measurement1) > (referenceDistance + incertidumbre))
+                {
+                    moveBackwards();
+                }
                 controlDoneFlag = false; // significa que todavía falta verificar el control
             }
         }
@@ -255,12 +286,18 @@ bool controlV_position(int currentX, int currentY, float incertidumbre)
             }
             else if (measured_Distance < (referenceDistance - incertidumbre))
             {
-                moveAhead();
+                while (getDistanceBack(&measurement1) < (referenceDistance - incertidumbre))
+                {
+                    moveAhead();
+                }
                 controlDoneFlag = false;
             }
             else if (measured_Distance > (referenceDistance + incertidumbre))
             {
-                moveBackwards();
+                while (getDistanceBack(&measurement1) > (referenceDistance + incertidumbre))
+                {
+                    moveBackwards();
+                }
                 controlDoneFlag = false; // significa que todavía falta verificar el control
             }
         }
@@ -275,12 +312,18 @@ bool controlV_position(int currentX, int currentY, float incertidumbre)
             }
             else if (measured_Distance < (referenceDistance - incertidumbre))
             {
-                moveBackwards();
+                while (getDistanceFront(&measurement1) < (referenceDistance - incertidumbre))
+                {
+                    moveBackwards();
+                }
                 controlDoneFlag = false;
             }
             else if (measured_Distance > (referenceDistance + incertidumbre))
             {
-                moveAhead();
+                while (getDistanceFront(&measurement1) > (referenceDistance + incertidumbre))
+                {
+                    moveAhead();
+                }
                 controlDoneFlag = false; // significa que todavía falta verificar el control
             }
         }
@@ -289,22 +332,29 @@ bool controlV_position(int currentX, int currentY, float incertidumbre)
     {
         if (Grid[currentX][currentY].AbsPosx <= Grid[currentX][currentY].AbsPosx_inv)
         {
+            referenceDistance = Grid[currentX][currentY].AbsPosx;
+            measured_Distance = getDistanceFront(&measurement1);
+
             if ((measured_Distance >= (referenceDistance - incertidumbre)) && (measured_Distance <= (referenceDistance + incertidumbre)))
             {
                 controlDoneFlag = true;
             }
             else if (measured_Distance < (referenceDistance - incertidumbre))
             {
-                moveBackwards();
+                while (getDistanceFront(&measurement1) < (referenceDistance - incertidumbre))
+                {
+                    moveBackwards();
+                }
                 controlDoneFlag = false;
             }
             else if (measured_Distance > (referenceDistance + incertidumbre))
             {
-                moveAhead();
+                while (getDistanceFront(&measurement1) > (referenceDistance + incertidumbre))
+                {
+                    moveAhead();
+                }
                 controlDoneFlag = false; // significa que todavía falta verificar el control
             }
-            referenceDistance = Grid[currentX][currentY].AbsPosx;
-            measured_Distance = getDistanceFront(&measurement1);
         }
         else if (Grid[currentX][currentY].AbsPosx > Grid[currentX][currentY].AbsPosx_inv)
         {
@@ -316,26 +366,34 @@ bool controlV_position(int currentX, int currentY, float incertidumbre)
             }
             else if (measured_Distance < (referenceDistance - incertidumbre))
             {
-                moveAhead();
+                while (getDistanceBack(&measurement1) < (referenceDistance - incertidumbre))
+                {
+                    moveAhead();
+                }
                 controlDoneFlag = false;
             }
             else if (measured_Distance > (referenceDistance + incertidumbre))
             {
-                moveBackwards();
+                while (getDistanceBack(&measurement1) > (referenceDistance + incertidumbre))
+                {
+                    moveBackwards();
+                }
                 controlDoneFlag = false; // significa que todavía falta verificar el control
             }
         }
     }
+    DebugPrint4("Done vertical control", 0, controlDoneFlag);
     return controlDoneFlag;
 }
 
 void turnEvaluation(int currentX, int currentY)
 {
-    if (Grid[currentX + SafeDistance / stepGrid][currentY].obstacle == true || Grid[currentX - SafeDistance / stepGrid][currentY].obstacle == true || Grid[currentX][currentY + SafeDistance / stepGrid].obstacle == true || Grid[currentX][currentY - SafeDistance / stepGrid].obstacle == true)
+    if ((Grid[currentX + SafeDistance / stepGrid][currentY].obstacle == true && CurrentDirectionMovement == RIGHT) || (Grid[currentX - SafeDistance / stepGrid][currentY].obstacle == true) && CurrentDirectionMovement == LEFT || (Grid[currentX][currentY + SafeDistance / stepGrid ].obstacle == true) && CurrentDirectionMovement == FRONT || (Grid[currentX][currentY - SafeDistance / stepGrid].obstacle == true) && CurrentDirectionMovement == BACK)
     {
 
         if (Wall_to_allign == LEFT)
         {
+            DebugPrint4("gire", 0, 0);
             turnRight();
         }
         else

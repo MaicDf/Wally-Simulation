@@ -9,7 +9,7 @@
 
 // Incertidumbres
 float incertidumbre_control = 1;
-float incertidumbre_ajuste = 1;
+float incertidumbre_ajuste = 0.1;
 float incertidumbre_medicion = 0.5;
 
 // variables para mapeo y movimiento
@@ -18,7 +18,8 @@ float incertidumbre_medicion = 0.5;
 
 // auxiliares
 int NearestPlace1;
-
+SafeDistance = 6;
+stepGrid = 2;
 void init();
 void Map_around();
 void fillGrid(int tamx, int tamy);
@@ -26,8 +27,7 @@ void fillGrid(int tamx, int tamy);
 // aqui va a estar el "cerebro"
 int main()
 {
-    stepGrid = 2;
-    SafeDistance = 3 * stepGrid;
+
     currentPointX = SafeDistance / stepGrid;
     currentPointY = SafeDistance / stepGrid;
 
@@ -46,11 +46,11 @@ int main()
     startPointFlag = true; // para que el robot se mueva en la grid
 
     /* 3.Map walls*/
-    // Map_walls();
+    Map_walls();
     /* 4.initialMapping(), va llenar un arreglo de 100*100 .............................................................................. v
      */
-    // Map_around();
-    // printGrid(Grid, Wall_to_allign);
+    Map_around();
+     printGrid(Grid, Wall_to_allign);
     return 0;
 }
 
@@ -58,7 +58,7 @@ void init()
 {
     getAll(&measurement1);
     NearestPlace1 = nearest(measurement1.USfront, measurement1.USback, measurement1.USleft, measurement1.USright);
-    DebugPrint("Entro", 0, 0);
+
     if (NearestPlace1 == FRONT)
     {
         while (getDistanceFront(&measurement1) > SafeDistance)
@@ -89,8 +89,10 @@ void init()
     else if (NearestPlace1 == LEFT)
     {
         turnLeft();
+        DebugPrint("safeDistance, DFRONT", SafeDistance, getDistanceFront(&measurement1));
         while (getDistanceFront(&measurement1) > SafeDistance)
         {
+
             DebugPrint("FrontDistance:", 0, getDistanceFront(&measurement1));
             moveAhead();
         }
@@ -124,10 +126,11 @@ void edgeSearching()
 
                 ctrlDistance = controlDistance(RIGHT, SafeDistance, incertidumbre_control);
             }
-            DebugPrint2("Left turn: Distance Front:", 0, getDistanceFront(&measurement1));
+
             moveAhead();
         }
         turnLeft();
+        DebugPrint("Left turn: Distance left:", 0, getDistanceLeft(&measurement1));
         Wall_to_allign = RIGHT;
     }
     else if (NearestPlace1 == RIGHT)
@@ -141,10 +144,11 @@ void edgeSearching()
                 ctrlDistance = controlDistance(LEFT, SafeDistance, incertidumbre_control);
 
             } // función para que siempre se mantenga paralelo a la pared.
-            DebugPrint2("Right turn: Distance Front:", 0, getDistanceFront(&measurement1));
+
             moveAhead();
         }
         turnRight();
+        DebugPrint("Right turn: Distance LEFT:", 0, getDistanceLeft(&measurement1));
         Wall_to_allign = LEFT;
     }
     else if (NearestPlace1 == EQUAL)
@@ -171,18 +175,18 @@ void edgeSearching()
 void Map_walls()
 {
     int topW = roundf(secureReading(FRONT, 0.5) / stepGrid);
-    int leftW = roundf(secureReading(LEFT, 0.5) / stepGrid);
+    int leftW = roundf(secureReading(LEFT, 0.5) / 2);
     int backW = roundf(secureReading(BACK, 0.5) / stepGrid);
     int rightW = roundf(secureReading(RIGHT, 0.5) / stepGrid);
     mapHeight = topW + backW;
     mapWidth = leftW + rightW;
 
+    // DebugPrint("topW,secureRead", topW, secureReading(FRONT, 0.5));
+    DebugPrint2("LefW,secureRead", leftW, secureReading(LEFT, 0.5));
+    // DebugPrint3("grid init invposx,invposxy", Grid[currentPointX][currentPointY].AbsPosx_inv, Grid[currentPointX][currentPointY].AbsPosy_inv);
+    // DebugPrint4("grid init posx,posxy", Grid[currentPointX][currentPointY].AbsPosx, Grid[currentPointX][currentPointY].AbsPosy);
     fillGrid(mapWidth, mapHeight);
 
-    DebugPrint("topW,secureRead", topW, secureReading(FRONT, 0.5));
-    DebugPrint2("LefW,secureRead", leftW, secureReading(LEFT, 0.5));
-    DebugPrint3("grid init invposx,invposxy", Grid[currentPointX][currentPointY].AbsPosx_inv, Grid[currentPointX][currentPointY].AbsPosy_inv);
-    DebugPrint4("grid init posx,posxy", Grid[currentPointX][currentPointY].AbsPosx, Grid[currentPointX][currentPointY].AbsPosy);
     /*     DebugPrint3("grid init invposx,invposxy", Grid[25][30].AbsPosx_inv, Grid[25][30].AbsPosy_inv);
         DebugPrint4("grid init posx,posxy", Grid[25][30].AbsPosx, Grid[25][30].AbsPosy); */
     int i, j;
@@ -243,31 +247,41 @@ void Map_around()
     3. Gira si necesita girar
     4. se mueve hacia adelante 1 punto en la grilla,  y vuelve a repetir.
     */
+    int i = 0;
     bool end_flag = false;
-    while (!end_flag)
+    while (1)
     {
+        // DebugPrint3("i", i, 0);
+        //   i++;
+        //  ;
+        DebugPrint3("coordenada x,y", Grid[currentPointX][currentPointY].AbsPosx, Grid[currentPointX][currentPointY].AbsPosy);
+        DebugPrint3("coordenada x,y",currentPointX ,currentPointY );
 
         bool ctrlH_position = controlH_position(currentPointX, currentPointY, incertidumbre_ajuste);
         while (!ctrlH_position)
         {
             ctrlH_position = controlH_position(currentPointX, currentPointY, incertidumbre_ajuste);
+
+            // DebugPrint4("encerrado en controlH", 0, 0);
         }
         bool ctrlV_position = controlV_position(currentPointX, currentPointY, incertidumbre_ajuste);
         while (!ctrlV_position)
         {
+
             ctrlV_position = controlV_position(currentPointX, currentPointY, incertidumbre_ajuste);
+            //  DebugPrint4("encerrado en controlV", 0, 0);
         }
 
         Map_From_currentPoint(currentPointX, currentPointY, incertidumbre_medicion);
-       // turnEvaluation(currentPointX, currentPointY); // si queda tiempo, es posible evaluar giros más complicados
-
-        // moveAhead_grid(currentPointX, currentPointY);
-
+        turnEvaluation(currentPointX, currentPointY); // si queda tiempo, es posible evaluar giros más complicados
+        moveAheadGrid();
+        // DebugPrint4("final", 0, 0);
         if (currentPointX == SafeDistance / stepGrid && currentPointY == SafeDistance / stepGrid)
         {
-            end_flag == true; // volvió al inicio.
+            break; // volvió al inicio.
         }
     }
+    DebugPrint("sali", 0, 0);
 }
 
 direction nearest(float front_, float back_, float left_, float right_)

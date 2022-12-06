@@ -3,12 +3,10 @@
 
 
 //aquí va a estar el "cerebro"
-
- 
+int safeDistance;
 int main(){ 
-float a=17.8/2;
-int b=roundf(a);
-printf("%i",b);
+int topW = roundf(6.9 / 2);
+printf("%i",topW);
 return 0;
 } 
 

@@ -15,14 +15,15 @@ typedef struct
 direction SimCurrentDirectionMovement = FRONT; // comienza mirando al frente
 // just for simulation
 
-int myDelay1 = 100;
-int myDelay2 = 50;
+int myDelay1 = 10;
+int myDelay2 = 500;
 int startpointx = 10;
 int startpointy = 5;
 int anchoWally = 10;
 int altoWally = 10;
 void display_map();
 void fillVoidLine(int line);
+void fillFullLine(int width);
 void robotPrint(int posxInit, int posyInit, direction dir);
 void usReading(USdistances *Measurement);
 void moveAheadSimulation();
@@ -47,8 +48,8 @@ int rows = 80;
 int columns = 80;
 MapPoint FullMap[80][80];
 COORD c = {0, 0};
-//int robotPosX = 20, robotPosy = 70;
-int robotPosX = 40, robotPosy = 45;
+// int robotPosX = 20, robotPosy = 70;
+int robotPosX = 30, robotPosy = 60;
 void setxy(int x, int y)
 {
 	c.X = x;
@@ -89,6 +90,8 @@ void display_map()
 		FullMap[rows - 1][j].state = '*';
 		printf("%c", FullMap[rows - 1][j].state);
 	}
+	fillFullLine(2);
+
 
 	// fill the rest, fila i, columna j
 
@@ -124,6 +127,21 @@ void fillVoidLine(int line)
 		printf("%c", FullMap[line][j].state);
 	}
 }
+void fillFullLine(int width)
+{
+	int j;
+	// llenando los bordes
+
+	for (j = 30; j < 50 - 1; j++)
+	{
+		setxy(startpointx + j, startpointy + 30);
+		FullMap[4][j].posx = startpointx + j;
+		FullMap[4][j].posy = 30;
+		FullMap[4][j].state = '*';
+		printf("%c", FullMap[4][j].state);
+	}
+}
+
 void robotPrint(int posxInit, int posyInit, direction dir)
 {
 	if (dir == RIGHT)
@@ -254,7 +272,7 @@ void DebugPrint2(char message[64], int valI, float valf)
 	setxy(0, 1);
 	printf("\n");
 	printf(message);
-	printf(" --: %d, : %f \n", valI, valf);
+	printf(" %d, %f \n", valI, valf);
 }
 void DebugPrint3(char message[64], int valI, float valf)
 {
@@ -418,7 +436,7 @@ void turnRightSimulation()
 {
 	if (SimCurrentDirectionMovement == FRONT)
 	{
-		DebugPrint("Entre acaaa", 0, 0);
+		DebugPrint("Giroderecha", 0, 0);
 		SimCurrentDirectionMovement = RIGHT;
 		robotPrint(robotPosX, robotPosy, SimCurrentDirectionMovement);
 		delay(myDelay2);
@@ -572,7 +590,7 @@ void ShowConsoleCursor(bool showFlag)
 
 void printGrid(GridPoint myGrid[100][100], direction myToken)
 {
-	//DebugPrint2("entre aqui0->", myToken, myGrid[0][0].obstacle);
+	// DebugPrint2("entre aqui0->", myToken, myGrid[0][0].obstacle);
 	int a, b;
 	setxy(0, columns + 8);
 	printf("\n");
@@ -581,7 +599,7 @@ void printGrid(GridPoint myGrid[100][100], direction myToken)
 
 	for (a = 0; a < 100; a++)
 	{
-		//DebugPrint3("entre aqui", 0, myGrid[0][0].obstacle);
+		// DebugPrint3("entre aqui", 0, myGrid[0][0].obstacle);
 
 		for (b = 0; b < 100; b++)
 		{
